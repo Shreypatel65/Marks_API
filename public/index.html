@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="index.css">
+    <script src="script.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <title>API Admin</title>
+</head>
+
+<body>
+    <ul class="navigation">
+        <li class="nav-item"><a href="/">Home</a></li>
+        <li class="nav-item"><a href="#">Logout</a></li>
+    </ul>
+
+    <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+    <label for="nav-trigger"></label>
+
+    <div class="site-wrap">
+        <!-- <h1>Welcome, User!</h1> -->
+
+        <div class="filearea">
+            <h5 class="fw-bold">Upload a CSV here</h5>
+            Click here to download a demo template:
+            <input type="button" class="button-30" value="Download">
+
+
+            <form id="upload-form">
+
+                <div style="display: flex;">
+                    <input type="file" class="file-input" id="fileInput" accept=".csv" onchange="showfilename(this)"
+                        required>
+                    <label for="fileInput" class="custom-button button-30">Choose File</label>
+                    <p id="fileNameDisplay" class="file-name-display"></p>
+                </div>
+
+
+
+                <div class="form__group field">
+                    <input type="number" class="form__field" name="sem" placeholder="" required>
+                    <label for="sem" class="form__label">SEM</label>
+                </div>
+                <div class="form__group field">
+
+                    <input type="number" class="form__field" name="sem" placeholder="" required>
+                    <label for="sem" class="form__label">Phase</label>
+                </div>
+                <div class="form__group field">
+
+                    <input type="text" class="form__field" name="sem" placeholder="" required>
+                    <label for="sem" class="form__label">Subject</label>
+                </div>
+                <input type="submit" class="button-30" value="Submit">
+            </form>
+        </div>
+
+        <div class="content">
+            <form id="keygen">
+                <h5 class="fw-bold"> Generate New API-Key</h5>
+                Enter name of User:
+                <div class="form__group field">
+
+                    <input type="text" class="form__field" id="uname" placeholder="" required>
+                    <label for="sem" class="form__label">Name</label>
+                </div>
+                <input type="submit" class="button-30" value="Submit">
+            </form>
+            <div class="keytable"></div>
+        </div>
+        <div class="keygentxt"></div>
+
+        <div class="change_area">
+            <h5 class="fw-bold"> Change Password</h5>
+            <form id="change_pass">
+                <div class="form__group field">
+
+                    <input type="text" class="form__field" id="old_pass" placeholder="" required>
+                    <label for="sem" class="form__label">Old Pass</label>
+                </div>
+                <div class="form__group field">
+
+                    <input type="text" class="form__field" id="new_pass" placeholder="" required>
+                    <label for="sem" class="form__label">New Pass</label>
+                </div>
+                <input type="submit" class="button-30" value="Change Password">
+
+            </form>
+            <div class="pass_area"></div>
+        </div>
+    </div>
+
+</body>
+
+</html>

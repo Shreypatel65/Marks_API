@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Login</title>
+    <link rel="stylesheet" href="login.css">
+</head>
+
+<body>
+<div class="site-warp">
+    <div class="card">
+        <div class="heading">API Login</div>
+        <form id="loginForm">
+            <div class="input-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username">
+            </div>
+            <div class="input-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password">
+            </div>
+            <div class="submit_btn_div">
+                <input type="submit" value="Login" class="submit_btn">
+            </div>
+        </form>
+        <p id="message"></p>
+    </div>
+</div>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password }),
+            });
+
+            const data = await response.json();
+            const messageElement = document.getElementById('message');
+
+            if (response.ok) {
+                messageElement.textContent = data.message;
+                window.location.reload(); // Reload the page after successful login
+            } else {
+                messageElement.textContent = data.error;
+            }
+        });
+    </script>
+</body>
+
+</html>

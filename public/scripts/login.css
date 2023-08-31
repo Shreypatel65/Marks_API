@@ -1,0 +1,78 @@
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    font-family: "JetBrains Mono", monospace;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image: linear-gradient(135deg, rgb(254, 255, 255) 0%, rgb(221, 241, 249) 35%, rgb(160, 216, 239) 100%);
+    background-size: 100%;
+
+}
+
+.card {
+    width: 400px;
+    height: 250px;
+    border-radius: 30px;
+    background: #FCFCFD;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 50px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 26px -18px inset;
+    padding: 2.5%;
+    font-size: x-large;
+    display: flex;
+    flex-direction: column;
+    /* Display children in a column layout */
+    align-items: center;
+}
+
+.heading {
+    font-size: 2em;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+}
+
+form {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+}
+
+label,
+input {
+    display: inline-block;
+}
+
+label {
+    flex: 1;
+    margin-right: 10px;
+    text-align: right;
+}
+
+input {
+    flex: 2;
+}
+
+.submit_btn {
+    height: 35px;
+    width: 200px;
+    background-color: #dee3e6;
+    border: 2px groove;
+    border-radius: 25px;
+}
+
+.submit_btn_div {
+    padding: 0.5em;
+    display: grid;
+    justify-content: center;
+}
+#loginForm{
+    margin-top: 1.5em;
+}
