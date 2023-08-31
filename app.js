@@ -42,13 +42,13 @@ app.get('/login', (req, res) => {
 
 })
 app.get('/', (req, res) => {
-    // res.sendFile(__dirname + '/public/index.html');
+    res.sendFile(__dirname + '/public/index.html');
 
-    if (req.session.userId) {
-        res.sendFile(__dirname + '/public/index.html');
-    } else {
-        res.sendFile(__dirname + '/public/login.html');
-    }
+    // if (req.session.userId) {
+    //     res.sendFile(__dirname + '/public/index.html');
+    // } else {
+    //     res.sendFile(__dirname + '/public/login.html');
+    // }
 
 });
 
@@ -97,7 +97,7 @@ app.post('/keygen', requireAuth, async (req, res) => {
     const apikey = generateApiKey();
     try {
         let result = await keydb.insertOne({ _id: uname, key: apikey });
-        res.status(200).json({ message: apikey });
+        res.status(200).json({ message: `${uname},${apikey}` });
     }
     catch (err) {
         if (err.code == 11000) {

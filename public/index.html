@@ -30,34 +30,30 @@
             <input type="button" class="button-30" value="Download">
 
 
-            <form id="upload-form">
-
+            <form id="upload-form" enctype="multipart/form-data">
                 <div style="display: flex;">
                     <input type="file" class="file-input" id="fileInput" accept=".csv" onchange="showfilename(this)"
                         required>
                     <label for="fileInput" class="custom-button button-30">Choose File</label>
                     <p id="fileNameDisplay" class="file-name-display"></p>
                 </div>
-
-
-
                 <div class="form__group field">
-                    <input type="number" class="form__field" name="sem" placeholder="" required>
+                    <input type="number" class="form__field" id="sem" name="sem" placeholder="" required>
                     <label for="sem" class="form__label">SEM</label>
                 </div>
                 <div class="form__group field">
-
-                    <input type="number" class="form__field" name="sem" placeholder="" required>
-                    <label for="sem" class="form__label">Phase</label>
+                    <input type="number" class="form__field" id="phase" name="phase" placeholder="" required>
+                    <label for="phase" class="form__label">Phase</label>
                 </div>
                 <div class="form__group field">
-
-                    <input type="text" class="form__field" name="sem" placeholder="" required>
-                    <label for="sem" class="form__label">Subject</label>
+                    <input type="text" class="form__field" id="subject" name="subject" placeholder="" required>
+                    <label for="subject" class="form__label">Subject</label>
                 </div>
                 <input type="submit" class="button-30" value="Submit">
             </form>
         </div>
+
+
 
         <div class="content">
             <form id="keygen">
@@ -72,7 +68,6 @@
             </form>
             <div class="keytable"></div>
         </div>
-        <div class="keygentxt"></div>
 
         <div class="change_area">
             <h5 class="fw-bold"> Change Password</h5>
@@ -93,7 +88,6 @@
             <div class="pass_area"></div>
         </div>
     </div>
-
 </body>
 
 </html>

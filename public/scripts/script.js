@@ -1,45 +1,55 @@
 document.addEventListener("DOMContentLoaded", async function () {
 
-    await getKeys();
+    // await getKeys();
 
-    // document.getElementById("upload-form").addEventListener("submit", async (event) => {
-
-    // });
-
-document.getElementById("keygen").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const uname = document.getElementById('uname').value;
-
-    const response = await fetch('/keygen', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ uname })
-    });
-    await getKeys();
-});
-
-document.getElementById("change_pass").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const old_pass = document.getElementById("old_pass").value;
-    const new_pass = document.getElementById("new_pass").value;
-
-    const response = await fetch('/changepwd', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ old_pass, new_pass })
+    const form = document.getElementById("upload-form");
+    form.addEventListener("submit",async(event)=>{
+        event.preventDefault();
+        const fromData = new FormData(form);
+        const response = await fetch('/upload', {
+            method:'POST',
+            body: fromData
+        });
+        const data = response.json();
+        window.alert(data.message);
     });
 
-    const data = response.json();
-    console.log(data);
-    const txtarea = document.querySelector(".pass_area");
+    document.getElementById("keygen").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const uname = document.getElementById('uname').value;
 
-    txtarea.innerHTML = data.message
-});
-    
+        const response = await fetch('/keygen', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ uname })
+        });
+        const data = response.json();
+        window.alert(data.message);
+        await getKeys();
+    });
+
+    document.getElementById("change_pass").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const old_pass = document.getElementById("old_pass").value;
+        const new_pass = document.getElementById("new_pass").value;
+
+        const response = await fetch('/changepwd', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ old_pass, new_pass })
+        });
+
+        const data = response.json();
+        // console.log(data);
+        const txtarea = document.querySelector(".pass_area");
+
+        txtarea.innerHTML = data.message
+    });
+
 });
 
 async function getKeys() {

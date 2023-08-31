@@ -26,7 +26,7 @@ app.get('/',(req,res)=>{
     var x = "Helo"
     return res.status(200).send("Yayyy");
 })
-app.post('/', upload.single('file'), (req, res) => {
+app.post('/upload', upload.single('file'), (req, res) => {
     const startTime = new Date();
     if (!req.file) {
         res.status(400).send('No file uploaded.');
