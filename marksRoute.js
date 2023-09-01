@@ -22,7 +22,7 @@ router.get('/', async (req, res) => {
             res.status(401).json({ error: 'Unauthorized: Invalid API key' });
             return;
         }
-
+        delete req.query.key;
         // Parse and validate the query parameters using the inputCheck function
         const query = req.query;
         const validQuery = inputCheck(query);
@@ -34,9 +34,9 @@ router.get('/', async (req, res) => {
         }
 
         // Perform a database query to find data matching the validated query parameters
-        const projection = { _id: 0 };
-        const data = await studinfo.findOne(validQuery, { projection });
-
+        // const projection = { _id: 0 };
+        const data = await studinfo.findOne(validQuery);
+        delete data._id;
         if (data) {
             // If data is found, respond with a 200 OK status and the data
             res.status(200).json(data);
