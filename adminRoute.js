@@ -73,6 +73,12 @@ router.post('/changepwd', requireAuth, async (req, res) => {
 // Generate API key route for admin
 router.post('/keygen', requireAuth, async (req, res) => {
     const { uname } = req.body;
+
+    if (!uname || uname.trim() === '') {
+        res.status(400).json({ message: 'Username cannot be empty.' });
+        return;
+    }
+    
     const apikey = generateApiKey();
 
     try {
