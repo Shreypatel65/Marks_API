@@ -7,46 +7,56 @@
 </head>
 
 <body>
-<div class="site-warp">
-    <div class="card">
-        <div class="heading">API Login</div>
-        <form id="loginForm">
-            <div class="input-group">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username">
-            </div>
-            <div class="input-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password">
-            </div>
-            <div class="submit_btn_div">
-                <input type="submit" value="Login" class="submit_btn">
-            </div>
-        </form>
-        <p id="message"></p>
+    <div class="site-wrap">
+        <div class="card">
+            <div class="heading">API Login</div>
+            <form id="loginForm">
+                <div class="input-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username">
+                </div>
+                <div class="input-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password">
+                </div>
+                <div class="submit_btn_div">
+                    <input type="submit" value="Login" class="submit_btn">
+                </div>
+            </form>
+            <p id="message"></p>
+        </div>
     </div>
-</div>
     <script>
+        // Add an event listener to the form for handling form submission
         document.getElementById('loginForm').addEventListener('submit', async (event) => {
-            event.preventDefault();
+            event.preventDefault(); // Prevent the default form submission behavior
+
+            // Retrieve the values of the username and password input fields
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
-            const response = await fetch('/login', {
+            // Send a POST request to the server's '/admin/login' endpoint with the login credentials
+            const response = await fetch('/admin/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ username, password }),
+                body: JSON.stringify({ username, password }), // Convert to JSON and send in the request body
             });
 
+            // Parse the JSON response from the server
             const data = await response.json();
+
+            // Get the message element where login status messages will be displayed
             const messageElement = document.getElementById('message');
 
+            // Check the response status
             if (response.ok) {
+                // If the response is successful (status code 2xx), display a success message and reload the page
                 messageElement.textContent = data.message;
                 window.location.reload(); // Reload the page after successful login
             } else {
+                // If the response is not successful, display an error message
                 messageElement.textContent = data.error;
             }
         });

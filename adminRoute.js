@@ -1,17 +1,15 @@
-var path = require('path');
-const multer = require('multer');
+// Import required libraries
 const express = require('express');
-const session = require('express-session');
-const app = express();
-const port = 3000;
-const { MongoClient } = require('mongodb');
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
+const csv = require('csv-parser');
+const router = express.Router();
 
-app.use(express.static('public/scripts'));
-app.use(session({
-    secret: 'chacha',
-    resave: false,
-    saveUninitialized: false
-}));
+// Import custom utility functions and databases
+const { generateApiKey, requireAuth, authdb, keydb, studinfo } = require('./utils');
+
+// Configure storage for file uploads using Multer
 const storage = multer.diskStorage({
     destination: 'uploads/',
     filename: function (req, file, cb) {
@@ -20,50 +18,19 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-const url = "mongodb://chacha:shrey5510@127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1.10.1";
-const client = new MongoClient(url, { useNewUrlParser: true, useUnifiedTopology: true });
-const db = client.db('demo');
-const authdb = db.collection('authdb');
-const keydb = db.collection('keydb');
-const studinfo = db.collection('studinfo');
+// Define the admin-related routes
 
-app.use(express.json());
-
-function requireAuth(req, res, next) {
+// Serve the admin panel or login page based on session status
+router.get('/', (req, res) => {
     if (req.session.userId) {
-        return next();
-    }
-    res.status(403).send('Access denied');
-}
-
-function generateApiKey() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    const apiKeyLength = 32;
-    let apiKey = '';
-    for (let i = 0; i < apiKeyLength; i++) {
-        const randomIndex = Math.floor(Math.random() * chars.length);
-        apiKey += chars[randomIndex];
-    }
-    return apiKey;
-}
-
-app.get('/login', (req, res) => {
-    res.sendFile(__dirname + '/public/login.html');
-
-})
-app.get('/', (req, res) => {
-    // res.sendFile(__dirname + '/public/index.html');
-
-    if (req.session.userId) {
-        res.sendFile(__dirname + '/public/index.html');
+        res.sendFile(path.join(__dirname, '/public/index.html'));
     } else {
-        res.sendFile(__dirname + '/public/login.html');
+        res.sendFile(path.join(__dirname, '/public/login.html'));
     }
-
 });
 
-
-app.post('/login', async (req, res) => {
+// Handle admin login
+router.post('/login', async (req, res) => {
     const { username, password } = req.body;
     let user = await authdb.findOne({ _id: username, pass: password });
     if (user) {
@@ -72,8 +39,10 @@ app.post('/login', async (req, res) => {
     } else {
         res.status(401).json({ error: 'Invalid credentials' });
     }
-})
-app.get('/logout', (req, res) => {
+});
+
+// Logout route for admin
+router.get('/logout', (req, res) => {
     req.session.destroy((err) => {
         if (err) {
             console.error('Error destroying session:', err);
@@ -83,33 +52,33 @@ app.get('/logout', (req, res) => {
     });
 });
 
-app.post('/changepwd', async (req, res) => {
-    const { old_pass, new_pass } = req.body
-    console.log(req.body);
-    const user = req.session.userId
+// Change password route for admin
+router.post('/changepwd', requireAuth, async (req, res) => {
+    const { old_pass, new_pass } = req.body;
+    const user = req.session.userId;
     let result = await authdb.findOne({ _id: user });
+
     if (old_pass == result.pass) {
         let result2 = await authdb.findOneAndUpdate({ _id: user }, { $set: { pass: new_pass } });
         if (result2) {
-            res.status(200).json({ message: "Password changed succesful" });
-        }
-        else {
+            res.status(200).json({ message: "Password changed successfully" });
+        } else {
             res.status(500).json({ message: "Internal Server Error" });
         }
-    }
-    else {
+    } else {
         res.status(401).json({ message: "Invalid Password" });
     }
-})
+});
 
-app.post('/keygen', requireAuth, async (req, res) => {
+// Generate API key route for admin
+router.post('/keygen', requireAuth, async (req, res) => {
     const { uname } = req.body;
     const apikey = generateApiKey();
+
     try {
         let result = await keydb.insertOne({ _id: uname, key: apikey });
         res.status(200).json({ message: `User:${uname}\nKey:${apikey}` });
-    }
-    catch (err) {
+    } catch (err) {
         if (err.code == 11000) {
             res.status(400).json({ message: 'API key for this user already exists.' });
         } else {
@@ -118,12 +87,14 @@ app.post('/keygen', requireAuth, async (req, res) => {
     }
 });
 
-app.get('/keys', requireAuth, async (req, res) => {
+// Fetch API keys route for admin
+router.get('/keys', requireAuth, async (req, res) => {
     let result = await keydb.find({}).toArray();
     res.status(200).json(result);
 });
 
-app.get('/delete', requireAuth, async (req, res) => {
+// Delete API key route for admin
+router.get('/delete', requireAuth, async (req, res) => {
     const { name } = req.query;
     let result = await keydb.deleteOne({ _id: name });
     if (result.deletedCount) {
@@ -131,9 +102,10 @@ app.get('/delete', requireAuth, async (req, res) => {
     } else {
         res.status(401).send();
     }
-})
+});
 
-app.post('/upload', upload.single('file'), (req, res) => {
+// Upload file route for admin
+router.post('/upload', requireAuth, upload.single('file'), (req, res) => {
     const startTime = new Date();
     if (!req.file) {
         res.status(400).send('No file uploaded.');
@@ -143,41 +115,60 @@ app.post('/upload', upload.single('file'), (req, res) => {
 
     const results = [];
 
-    const sem = req.body.sem;
-    const phase = req.body.phase;
+    var sem = req.body.sem;
+    var phase = req.body.phase;
     const subject = req.body.subject;
     if (!sem || !phase || !subject) {
         res.status(400).json({ message: 'Improper fields entered.' });
         return;
     }
-    const home = `academic.${sem}.${phase}.${subject}`
+    sem = 'sem' + sem;
+    phase = 't' + phase;
+    const home = `academic.${sem}.${phase}.${subject}`;
     const mypath = `academic.${sem}.total`;
 
-
+    // Create a read stream from the uploaded CSV file
     const readStream = fs.createReadStream(fileName)
+
+        // Use the 'csv-parser' library to parse the CSV data as it is read
         .pipe(csv())
+
+        // Event handler for when the CSV file headers are parsed
         .on('headers', (headers) => {
             let hasValidColumns = false;
             const validFields = ['enrollno', 'marks', 'rank'];
+
+            // Check if the CSV file headers contain the required fields
             hasValidColumns = validFields.every(field => headers.includes(field));
             if (!hasValidColumns) {
                 res.status(400).json({ message: 'Improper column names' });
+
+                // Destroy the read stream to stop processing the file
                 readStream.destroy();
             }
         })
+
+        // Event handler for each data row in the CSV
         .on('data', (data) => {
+            // Parse and convert string values to integers
             data.enrollno = parseInt(data.enrollno);
             data.marks = parseInt(data.marks);
             data.rank = parseInt(data.rank);
+
+            // Store the parsed data in the 'results' array
             results.push(data);
         })
+
+        // Event handler for when the end of the CSV file is reached
         .on('end', async () => {
+            // Fetch existing documents from the database that match 'home' criteria
             const existingDocument = await studinfo.find({
                 [home]: { $exists: true }
             },
                 { projection: { _id: 1, [home]: 1 } }
             ).toArray();
 
+            // Create an array of update operations based on the parsed CSV data
             const updateOps = results.map(data => {
                 const { enrollno, marks, rank } = data;
                 return {
@@ -187,15 +178,17 @@ app.post('/upload', upload.single('file'), (req, res) => {
                     }
                 };
             });
+
             try {
+                // Update the database with the calculated changes
                 const result = await studinfo.bulkWrite(updateOps);
-                // console.log(`Updated ${result.modifiedCount} documents`);
-                // res.status(200).json({ message: `File uploaded and processed successfully.\nUpdated ${result.modifiedCount} documents` });
 
-
+                // Fetch documents with updated data from the database
                 const documents = await studinfo.find({}, { projection: { _id: 1, [home]: 1, [mypath]: 1 } }).toArray();
 
-                var data = documents
+                var data = documents;
+
+                // Calculate and update 'total' marks and rank for each document
                 data.forEach(obj => {
                     const marks = obj.academic[sem][phase][subject].marks;
                     const totalm = obj.academic[sem].total?.marks ?? 0;
@@ -204,10 +197,12 @@ app.post('/upload', upload.single('file'), (req, res) => {
                     obj.total = { marks: mm, rank: 0 };
                 });
 
-
+                // Sort the data by 'total' marks in descending order
                 data.sort((a, b) => b.total.marks - a.total.marks);
 
                 let currentRank = 1;
+
+                // Calculate and assign ranks to the sorted data
                 data.forEach((obj, index) => {
                     if (index > 0 && obj.total.marks !== data[index - 1].total.marks) {
                         currentRank = index + 1;
@@ -215,6 +210,7 @@ app.post('/upload', upload.single('file'), (req, res) => {
                     obj.total.rank = currentRank;
                 });
 
+                // Create an array of update operations for 'mypath' field
                 const updateOps2 = data.map(data => {
                     const { _id, academic, total } = data;
                     return {
@@ -224,26 +220,27 @@ app.post('/upload', upload.single('file'), (req, res) => {
                         }
                     }
                 });
+
+                // Update the database with the calculated changes for 'mypath'
                 const result2 = await studinfo.bulkWrite(updateOps2);
 
+                // Log the number of documents updated and the processing time
                 console.log(`Updated ${result2.modifiedCount} documents`);
                 const endTime = new Date();
                 const elapsedTime = endTime - startTime; // Time in milliseconds
                 console.log(elapsedTime + "ms")
-                res.status(200).json({ message: `File uploaded and processed successfully.\nUpdated ${result2.modifiedCount} documents.` });
-                // res.status(200).json(updateOps2);
 
+                // Respond with a success message and the number of documents updated
+                res.status(200).json({ message: `File uploaded and processed successfully.\nUpdated ${result2.modifiedCount} documents.` });
                 return;
             } catch (error) {
+                // Handle and log errors, and respond with an internal server error
                 console.error('Error updating documents:', error);
                 res.status(500).json({ message: 'Internal server error' });
                 return;
             }
-
         });
 
 });
 
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-});
+module.exports = router;
