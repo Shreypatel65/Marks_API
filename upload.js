@@ -6,6 +6,7 @@ const fs = require('fs');
 const express = require('express');
 const app = express();
 const port = 3000;
+const basicAuth = require('basic-auth')
 
 const storage = multer.diskStorage({
     destination: 'uploads/',

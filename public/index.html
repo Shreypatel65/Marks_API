@@ -15,7 +15,7 @@
 <body>
     <ul class="navigation">
         <li class="nav-item"><a href="/">Home</a></li>
-        <li class="nav-item"><a href="#">Logout</a></li>
+        <li class="nav-item"><a href="/logout">Logout</a></li>
     </ul>
 
     <input type="checkbox" id="nav-trigger" class="nav-trigger" />
@@ -32,7 +32,7 @@
 
             <form id="upload-form" enctype="multipart/form-data">
                 <div style="display: flex;">
-                    <input type="file" class="file-input" id="fileInput" accept=".csv" onchange="showfilename(this)"
+                    <input type="file" name="file" class="file-input" id="fileInput" accept=".csv" onchange="showfilename(this)"
                         required>
                     <label for="fileInput" class="custom-button button-30">Choose File</label>
                     <p id="fileNameDisplay" class="file-name-display"></p>
