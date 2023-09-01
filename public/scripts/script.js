@@ -1,18 +1,21 @@
 document.addEventListener("DOMContentLoaded", async function () {
 
-    // await getKeys();
+    await getKeys();
 
-    const form = document.getElementById("upload-form");
-    form.addEventListener("submit",async(event)=>{
+    document.getElementById("upload-form").addEventListener("submit", async function (event) {
         event.preventDefault();
-        const fromData = new FormData(form);
-        const response = await fetch('/upload', {
-            method:'POST',
-            body: fromData
+
+        const formData = new FormData(this);
+
+        const response = await fetch("/upload", {
+            method: "POST",
+            body: formData,
         });
-        const data = response.json();
+        const data = await response.json()
+        console.log(data.message);
         window.alert(data.message);
     });
+
 
     document.getElementById("keygen").addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -25,7 +28,8 @@ document.addEventListener("DOMContentLoaded", async function () {
             },
             body: JSON.stringify({ uname })
         });
-        const data = response.json();
+        const data = await response.json();
+        console.log(data.message);
         window.alert(data.message);
         await getKeys();
     });
@@ -43,11 +47,9 @@ document.addEventListener("DOMContentLoaded", async function () {
             body: JSON.stringify({ old_pass, new_pass })
         });
 
-        const data = response.json();
-        // console.log(data);
-        const txtarea = document.querySelector(".pass_area");
-
-        txtarea.innerHTML = data.message
+        const data = await response.json();
+        console.log(data);
+        window.alert(data.message)
     });
 
 });
@@ -69,11 +71,11 @@ async function getKeys() {
     var text = "<table class='table table-hover'><tr><th>Names</th><th>Keys</th><th>Delete Key</th></tr>";
 
     data.forEach(element => {
-        text += `<tr><td>${element._id}</td><td>${element.key}
-                                </td><td>
-                                
-                                <input type="button" class="button-30 delete-button" name="${element._id}" value="Delete">
-                                </td></tr>`;
+        text += `<tr>
+        <td>${element._id}</td>
+        <td>${element.key}</td>
+        <td><input type="button" class="button-30 delete-button" name="${element._id}" value="Delete"></td>
+        </tr>`;
     });
 
     text += "</table>";
