@@ -34,10 +34,8 @@ router.get('/', async (req, res) => {
         }
 
         // Perform a database query to find data matching the validated query parameters
-        // const projection = { _id: 0 };
-        console.log(validQuery);
         const data = await studinfo.findOne(validQuery);
-        // delete data._id;
+        delete data._id;
         if (data) {
             // If data is found, respond with a 200 OK status and the data
             res.status(200).json(data);
