@@ -1,13 +1,13 @@
 const { MongoClient } = require('mongodb');
 
 // MongoDB connection URL with relevant options
-const url = "mongodb://chacha:shrey5510@127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1.10.1";
+const url = "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1.10.1";
 
 // Create a new MongoClient instance with specified URL and options
 const client = new MongoClient(url, { useNewUrlParser: true, useUnifiedTopology: true });
 
 // Connect to the 'demo' database and obtain collection references
-const db = client.db('demo');
+const db = client.db('fsd');
 const authdb = db.collection('authdb');
 const keydb = db.collection('keydb');
 const studinfo = db.collection('studinfo');
@@ -26,10 +26,10 @@ const generateApiKey = () => {
 
 // Function for input validation
 const inputCheck = (query) => {
-    if ((!query.batch || !query.rollno) && !query.enrollno) {
+    if ((!query.batch || !query.rollno) && !query.enroll) {
         return { error: 'Improper Input' };
     }
-    if ((query.batch || query.rollno) && query.enrollno) {
+    if ((query.batch || query.rollno) && query.enroll) {
         return { error: 'Provide either batch and rollno or enrollment number, not both' };
     }
     if (query.batch) {
@@ -38,8 +38,8 @@ const inputCheck = (query) => {
     if (query.rollno) {
         query.rollno = parseInt(query.rollno);
     }
-    if (query.enrollno) {
-        query.enrollno = parseInt(query.enrollno);
+    if (query.enroll) {
+        query.enroll = parseInt(query.enroll);
     }
     return query;
 };

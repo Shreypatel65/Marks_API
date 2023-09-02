@@ -22,12 +22,11 @@ const upload = multer({ storage });
 
 // Serve the admin panel or login page based on session status
 router.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '/public/index.html'));
-    // if (req.session.userId) {
-    //     res.sendFile(path.join(__dirname, '/public/index.html'));
-    // } else {
-    //     res.sendFile(path.join(__dirname, '/public/login.html'));
-    // }
+    if (req.session.userId) {
+        res.sendFile(path.join(__dirname, '/public/index.html'));
+    } else {
+        res.sendFile(path.join(__dirname, '/public/login.html'));
+    }
 });
 
 // Handle admin login
@@ -156,7 +155,7 @@ router.post('/upload', requireAuth, upload.single('file'), (req, res) => {
         // Event handler for when the CSV file headers are parsed
         .on('headers', (headers) => {
             let hasValidColumns = false;
-            const validFields = ['enrollno', 'marks', 'rank'];
+            const validFields = ['enroll', 'marks', 'rank'];
 
             // Check if the CSV file headers contain the required fields
             hasValidColumns = validFields.every(field => headers.includes(field));
@@ -171,8 +170,8 @@ router.post('/upload', requireAuth, upload.single('file'), (req, res) => {
         // Event handler for each data row in the CSV
         .on('data', (data) => {
             // Parse and convert string values to integers
-            data.enrollno = parseInt(data.enrollno);
-            data.marks = parseInt(data.marks);
+            data.enroll = parseInt(data.enroll);
+            data.marks = parseFloat(data.marks);
             data.rank = parseInt(data.rank);
 
             // Store the parsed data in the 'results' array
@@ -190,11 +189,11 @@ router.post('/upload', requireAuth, upload.single('file'), (req, res) => {
 
             // Create an array of update operations based on the parsed CSV data
             const updateOps = results.map(data => {
-                const { enrollno, marks, rank } = data;
+                const { enroll, marks, rank } = data;
                 return {
                     updateOne: {
-                        filter: { enrollno },
-                        update: { $set: { [home]: { marks, rank } } }
+                        filter: { enroll },
+                        update: { $set: { [home]: { marks, rank } } },
                     }
                 };
             });
@@ -202,7 +201,6 @@ router.post('/upload', requireAuth, upload.single('file'), (req, res) => {
             try {
                 // Update the database with the calculated changes
                 const result = await studinfo.bulkWrite(updateOps);
-
                 // Fetch documents with updated data from the database
                 const documents = await studinfo.find({}, { projection: { _id: 1, [home]: 1, [mypath]: 1 } }).toArray();
 
@@ -213,7 +211,7 @@ router.post('/upload', requireAuth, upload.single('file'), (req, res) => {
                     const marks = obj.academic[sem][phase][subject].marks;
                     const totalm = obj.academic[sem].total?.marks ?? 0;
                     const existingMarks = existingDocument.find(doc => doc._id.toString() === obj._id.toString())?.academic[sem][phase][subject].marks || 0;
-                    const mm = parseInt([marks]) + parseInt([totalm]) - parseInt([existingMarks])
+                    const mm = parseFloat([marks]) + parseFloat([totalm]) - parseFloat([existingMarks])
                     obj.total = { marks: mm, rank: 0 };
                 });
 
