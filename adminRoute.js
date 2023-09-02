@@ -22,11 +22,12 @@ const upload = multer({ storage });
 
 // Serve the admin panel or login page based on session status
 router.get('/', (req, res) => {
-    if (req.session.userId) {
-        res.sendFile(path.join(__dirname, '/public/index.html'));
-    } else {
-        res.sendFile(path.join(__dirname, '/public/login.html'));
-    }
+    res.sendFile(path.join(__dirname, '/public/index.html'));
+    // if (req.session.userId) {
+    //     res.sendFile(path.join(__dirname, '/public/index.html'));
+    // } else {
+    //     res.sendFile(path.join(__dirname, '/public/login.html'));
+    // }
 });
 
 // Handle admin login
@@ -70,6 +71,19 @@ router.post('/changepwd', requireAuth, async (req, res) => {
     }
 });
 
+router.get('/download', (req, res) => {
+    const filename = 'demo_template.csv'; // Predefined filename
+    const filePath = path.join(__dirname, 'public', filename);
+
+    // Use the res.download() method to send the file for download
+    res.download(filePath, (err) => {
+        if (err) {
+            // Handle any errors, such as file not found
+            res.status(404).send('File not found');
+        }
+    });
+});
+
 // Generate API key route for admin
 router.post('/keygen', requireAuth, async (req, res) => {
     const { uname } = req.body;
@@ -78,7 +92,7 @@ router.post('/keygen', requireAuth, async (req, res) => {
         res.status(400).json({ message: 'Username cannot be empty.' });
         return;
     }
-    
+
     const apikey = generateApiKey();
 
     try {
