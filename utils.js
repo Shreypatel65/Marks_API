@@ -1,3 +1,4 @@
+// Import required libraries
 const { MongoClient } = require('mongodb');
 
 // MongoDB connection URL with relevant options
@@ -49,7 +50,33 @@ const requireAuth = (req, res, next) => {
     if (req.session.userId) {
         return next(); // Proceed to the next middleware if user is authenticated
     }
-    res.status(403).send('Access denied'); // Respond with a 403 Forbidden status if not authenticated
+    res.status(403).json({ message: 'Access Denied: You are not authenticated.' }); // Respond with a 403 Forbidden status if not authenticated
 };
 
-module.exports = { generateApiKey, inputCheck, requireAuth, studinfo, authdb, keydb };
+// Function to calculate the total marks for each student
+const calcTotal = (data, existingDocument, sem, phase, subject) => {
+    data.forEach(obj => {
+        const marks = obj.academic[sem][phase][subject].marks;
+        const totalm = obj.academic[sem].total?.marks ?? 0;
+        const existingMarks = existingDocument.find(doc => doc._id.toString() === obj._id.toString())?.academic[sem][phase][subject].marks || 0;
+        const mm = parseFloat([marks]) + parseFloat([totalm]) - parseFloat([existingMarks])
+        obj.total = { marks: mm, rank: 0 };
+    });
+    return data;
+};
+
+// Function to calculate the rank for each student based on total marks
+const calcRank = (data) => {
+    data.sort((a, b) => b.total.marks - a.total.marks);
+    let currentRank = 1;
+    data.forEach((obj, index) => {
+        if (index > 0 && obj.total.marks !== data[index - 1].total.marks) {
+            currentRank = index + 1;
+        }
+        obj.total.rank = currentRank;
+    });
+    return data;
+};
+
+// Export all the functions and collections for use in other modules
+module.exports = { generateApiKey, inputCheck, requireAuth, calcTotal, calcRank, studinfo, authdb, keydb };
